@@ -14,13 +14,15 @@ namespace Extensions.Triggers
         private readonly INameResolver _nameResolver;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IWeatherService _weatherService;
+        private readonly ILogger<WeatherTriggerBindingProvider> _logger;
 
-        public WeatherTriggerBindingProvider(INameResolver nameResolver, 
+        public WeatherTriggerBindingProvider(INameResolver nameResolver,
             ILoggerFactory loggerFactory, IWeatherService weatherService)
         {
             this._nameResolver = nameResolver;
             this._loggerFactory = loggerFactory;
             this._weatherService = weatherService;
+            this._logger = this._loggerFactory.CreateLogger<WeatherTriggerBindingProvider>();
         }
 
         public Task<ITriggerBinding> TryCreateAsync(TriggerBindingProviderContext context)
@@ -35,9 +37,11 @@ namespace Extensions.Triggers
                 return Task.FromResult<ITriggerBinding>(null);
 
             triggerAttribute.ApiKey = GetTriggerAttributeApiKey(triggerAttribute);
+            triggerAttribute.SecondsBetweenCheck = GetTriggerAttributeSecondsBetweenCheck(triggerAttribute);
 
             return Task.FromResult<ITriggerBinding>(
-                new WeatherTriggerBinding(parameter, _nameResolver, _weatherService, triggerAttribute));
+                new WeatherTriggerBinding(parameter, _nameResolver, _weatherService, triggerAttribute,
+                this._loggerFactory));
         }
 
         private string GetTriggerAttributeApiKey(WeatherTriggerAttribute triggerAttribute)
@@ -53,6 +57,22 @@ namespace Extensions.Triggers
             }
 
             return triggerAttribute.ApiKey;
+        }
+
+        private int GetTriggerAttributeSecondsBetweenCheck(WeatherTriggerAttribute triggerAttribute)
+        {
+            if (triggerAttribute.SecondsBetweenCheck <= 0)
+            {
+                var secondsBetweenCheckConfig = _nameResolver.Resolve("Weather.SecondsBetweenCheck");
+
+                if (string.IsNullOrEmpty(secondsBetweenCheckConfig) ||
+                    (!int.TryParse(secondsBetweenCheckConfig, out var secondsBetweenCheck) && secondsBetweenCheck <= 0))
+                    return 30;
+
+                return secondsBetweenCheck;
+            }
+
+            return triggerAttribute.SecondsBetweenCheck;
         }
     }
 }

@@ -22,5 +22,9 @@ namespace Extensions.Triggers
         public string CityName { get; internal set; }
 
         public double TemperatureThreshold { get; internal set; }
+
+        [AppSetting(Default = "Weather.SecondsBetweenCheck")]
+        [AutoResolve]
+        public int SecondsBetweenCheck { get; set; }
     }
 }
