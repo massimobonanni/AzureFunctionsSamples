@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomTriggerAndBinding.Functions", "CustomTriggerAndBinding.Functions\CustomTriggerAndBinding.Functions.csproj", "{28F14AB3-6ADC-4560-AC4B-778670DE01D0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "Extensions\Extensions.csproj", "{AAFCC85D-43A1-4E26-A984-1C5140286855}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Twitter", "Twitter\Twitter.csproj", "{FF0DE7FE-CBE0-4931-87AC-ACD902E1A814}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherMap", "WeatherMap\WeatherMap.csproj", "{B8A2AF57-3B89-43D3-BF8C-6D3143632AC8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28F14AB3-6ADC-4560-AC4B-778670DE01D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28F14AB3-6ADC-4560-AC4B-778670DE01D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28F14AB3-6ADC-4560-AC4B-778670DE01D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28F14AB3-6ADC-4560-AC4B-778670DE01D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAFCC85D-43A1-4E26-A984-1C5140286855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAFCC85D-43A1-4E26-A984-1C5140286855}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAFCC85D-43A1-4E26-A984-1C5140286855}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAFCC85D-43A1-4E26-A984-1C5140286855}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF0DE7FE-CBE0-4931-87AC-ACD902E1A814}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF0DE7FE-CBE0-4931-87AC-ACD902E1A814}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF0DE7FE-CBE0-4931-87AC-ACD902E1A814}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF0DE7FE-CBE0-4931-87AC-ACD902E1A814}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8A2AF57-3B89-43D3-BF8C-6D3143632AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8A2AF57-3B89-43D3-BF8C-6D3143632AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8A2AF57-3B89-43D3-BF8C-6D3143632AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8A2AF57-3B89-43D3-BF8C-6D3143632AC8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {047CF102-D5EE-4CD7-B879-3312B2C70123}
+	EndGlobalSection
+EndGlobal
