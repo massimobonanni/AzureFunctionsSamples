@@ -10,7 +10,7 @@ namespace MonitoringAzureFunctions
     public static class MonitoringFunctions
     {
         [FunctionName("TimerTriggerFunction")]
-        public static void Run([TimerTrigger("0 */2 * * * *")]TimerInfo myTimer, ILogger log)
+        public static void Run([TimerTrigger("%ScheduleTriggerTime%")]TimerInfo myTimer, ILogger log)
         {
             var executionTimestamp = DateTime.Now;
             log.LogInformation($"C# Timer trigger function executed at: {executionTimestamp}");
