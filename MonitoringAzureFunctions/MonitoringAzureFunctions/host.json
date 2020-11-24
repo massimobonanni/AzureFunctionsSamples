@@ -3,8 +3,10 @@
   "logging": {
     "fileLoggingMode": "always",
     "logLevel": {
-      "Default": "Information",
+      "default": "Trace",
       "Function": "Trace",
+      "Function.TimerTriggerFunction": "Information",
+      "Microsoft" : "Information",
       "Host.Results": "Information",
       "Host.Aggregator": "Error"
     }

@@ -7,21 +7,28 @@ using Microsoft.Extensions.Logging;
 
 namespace MonitoringAzureFunctions
 {
-    public static class MonitoringFunctions
+    public class MonitoringFunctions
     {
         [FunctionName("TimerTriggerFunction")]
-        public static void Run([TimerTrigger("%ScheduleTriggerTime%")]TimerInfo myTimer, ILogger log)
+        public void Run(
+            [TimerTrigger("%ScheduleTriggerTime%")] TimerInfo myTimer,
+            ILogger log)
         {
             var executionTimestamp = DateTime.Now;
             log.LogInformation($"C# Timer trigger function executed at: {executionTimestamp}");
 
             log.LogTrace($"Is past due: {myTimer.IsPastDue}");
             log.LogTrace($"Schedule: {myTimer.Schedule}");
-            log.LogTrace($"Schedule Status Last: {myTimer.ScheduleStatus.Last}");
-            log.LogTrace($"Schedule Status Next: {myTimer.ScheduleStatus.Next}");
-            log.LogTrace($"Schedule Status LastUpdated: {myTimer.ScheduleStatus.LastUpdated}");
+
+            if (myTimer.ScheduleStatus != null)
+            {
+                log.LogTrace($"Schedule Status Last: {myTimer.ScheduleStatus.Last}");
+                log.LogTrace($"Schedule Status Next: {myTimer.ScheduleStatus.Next}");
+                log.LogTrace($"Schedule Status LastUpdated: {myTimer.ScheduleStatus.LastUpdated}");
+            }
+
             if (IsErrorOccurs())
-            { 
+            {
                 log.LogWarning($"Something happened in your function!!!");
                 throw new Exception();
             }
@@ -29,14 +36,14 @@ namespace MonitoringAzureFunctions
             log.LogMetric("MyCustomMetric", CalculateMyCustomMetric());
         }
 
-        private static readonly Random rand = new Random(DateTime.Now.Millisecond);
+        private  readonly Random rand = new Random(DateTime.Now.Millisecond);
 
-        private static double CalculateMyCustomMetric()
+        private  double CalculateMyCustomMetric()
         {
             return rand.NextDouble();
         }
 
-        private static bool IsErrorOccurs()
+        private  bool IsErrorOccurs()
         {
             return rand.Next(0, 100) < 20;
         }
