@@ -7,3 +7,5 @@ This repository contains some example from my technical sessions about Azure Fun
 <a href="TestingAzureFunctions/README.md" target="_blank">Testing Azure Functions</a>
 
 <a href="MonitoringAzureFunctions/README.md" target="_blank">Monitoring Azure Functions</a>
+
+<a href="AppConfigSyncFunction/README.md" target="_blank">Azure App Configuration synchronization with Azure Functions</a>
