@@ -1,0 +1,459 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "EnvironmentName": {
+      "defaultValue": "AppConfigSync",
+      "type": "String"
+    },
+    "AppConfigPrimaryRegion": {
+      "defaultValue": "[resourceGroup().location]",
+      "type": "String"
+    },
+    "AppConfigSecondaryRegion": {
+      "defaultValue": "West Europe",
+      "type": "String"
+    }
+  },
+  "variables": {
+    "AppFunctionName": "[concat(parameters('EnvironmentName'),'Function')]",
+    "AppInsightName": "[concat(parameters('EnvironmentName'),'AppInsight')]",
+    "StorageName": "[uniqueString(resourceGroup().id)]",
+    "PrimaryAppConfigurationName": "[concat(parameters('EnvironmentName'),'AppConfigPrimary')]",
+    "SecondaryAppConfigurationName": "[concat(parameters('EnvironmentName'),'AppConfigSecondary')]",
+    "AppFunctionAppServicePlanName": "[concat(parameters('EnvironmentName'),'AppServicePlan')]",
+    "PrimaryAppConfigTopic": "[concat(parameters('EnvironmentName'),'SystemTopic')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('PrimaryAppConfigurationName')]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "sku": {
+        "name": "standard"
+      },
+      "properties": {
+        "encryption": {}
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('SecondaryAppConfigurationName')]",
+      "location": "[parameters('AppConfigSecondaryRegion')]",
+      "sku": {
+        "name": "standard"
+      },
+      "properties": {
+        "encryption": {}
+      }
+    },
+    {
+      "type": "microsoft.insights/components",
+      "apiVersion": "2018-05-01-preview",
+      "name": "[variables('AppInsightName')]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "Request_Source": "IbizaWebAppExtensionCreate",
+        "RetentionInDays": 90,
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2020-08-01-preview",
+      "name": "[variables('StorageName')]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": true,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [],
+          "ipRules": [],
+          "defaultAction": "Allow"
+        },
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "name": "[variables('AppFunctionAppServicePlanName')]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic",
+        "size": "Y1",
+        "family": "Y",
+        "capacity": 0
+      },
+      "kind": "functionapp",
+      "properties": {
+        "perSiteScaling": false,
+        "maximumElasticWorkerCount": 1,
+        "isSpot": false,
+        "reserved": false,
+        "isXenon": false,
+        "hyperV": false,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0
+      }
+    },
+    {
+      "type": "Microsoft.EventGrid/systemTopics",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[variables('PrimaryAppConfigTopic')]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', variables('PrimaryAppConfigurationName'))]"
+      ],
+      "properties": {
+        "source": "[resourceId('Microsoft.AppConfiguration/configurationStores', variables('PrimaryAppConfigurationName'))]",
+        "topicType": "Microsoft.AppConfiguration.ConfigurationStores"
+      }
+    },
+    //{
+    //  "type": "Microsoft.Storage/storageAccounts/blobServices",
+    //  "apiVersion": "2020-08-01-preview",
+    //  "name": "[concat(variables('StorageName'), '/default')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+    //  ],
+    //  "sku": {
+    //    "name": "Standard_LRS",
+    //    "tier": "Standard"
+    //  },
+    //  "properties": {
+    //    "cors": {
+    //      "corsRules": []
+    //    },
+    //    "deleteRetentionPolicy": {
+    //      "enabled": false
+    //    }
+    //  }
+    //},
+    //{
+    //  "type": "Microsoft.Storage/storageAccounts/fileServices",
+    //  "apiVersion": "2020-08-01-preview",
+    //  "name": "[concat(variables('StorageName'), '/default')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+    //  ],
+    //  "sku": {
+    //    "name": "Standard_LRS",
+    //    "tier": "Standard"
+    //  },
+    //  "properties": {
+    //    "protocolSettings": {
+    //      "smb": {}
+    //    },
+    //    "cors": {
+    //      "corsRules": []
+    //    }
+    //  }
+    //},
+    {
+      "type": "Microsoft.Storage/storageAccounts/queueServices",
+      "apiVersion": "2020-08-01-preview",
+      "name": "[concat(variables('StorageName'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      }
+    },
+    //{
+    //  "type": "Microsoft.Storage/storageAccounts/tableServices",
+    //  "apiVersion": "2020-08-01-preview",
+    //  "name": "[concat(variables('StorageName'), '/default')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+    //  ],
+    //  "properties": {
+    //    "cors": {
+    //      "corsRules": []
+    //    }
+    //  }
+    //},
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('AppFunctionName')]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('AppFunctionAppServicePlanName'))]"
+      ],
+      "kind": "functionapp",
+      "properties": {
+        "enabled": true,
+        "hostNameSslStates": [
+          {
+            "name": "[concat(tolower(variables('AppFunctionName')),'.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Standard"
+          },
+          {
+            "name": "[concat(tolower(variables('AppFunctionName')),'.scm.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Repository"
+          }
+        ],
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppFunctionAppServicePlanName'))]",
+        "reserved": false,
+        "isXenon": false,
+        "hyperV": false,
+        "siteConfig": {},
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 1536,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": false,
+        "redundancyMode": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2018-11-01",
+      "name": "[concat(variables('AppFunctionName'), '/web')]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('AppFunctionName'))]"
+      ],
+      "properties": {
+        "numberOfWorkers": -1,
+        "defaultDocuments": [
+          "Default.htm",
+          "Default.html",
+          "Default.asp",
+          "index.htm",
+          "index.html",
+          "iisstart.htm",
+          "default.aspx",
+          "index.php"
+        ],
+        "netFrameworkVersion": "v4.0",
+        "phpVersion": "5.6",
+        "requestTracingEnabled": false,
+        "remoteDebuggingEnabled": false,
+        "httpLoggingEnabled": false,
+        "logsDirectorySizeLimit": 35,
+        "detailedErrorLoggingEnabled": false,
+        "publishingUsername": "$AppConfigSyncFunction",
+        "azureStorageAccounts": {},
+        "scmType": "None",
+        "use32BitWorkerProcess": true,
+        "webSocketsEnabled": false,
+        "alwaysOn": false,
+        "managedPipelineMode": "Integrated",
+        "virtualApplications": [
+          {
+            "virtualPath": "/",
+            "physicalPath": "site\\wwwroot",
+            "preloadEnabled": false
+          }
+        ],
+        "loadBalancing": "LeastRequests",
+        "experiments": {
+          "rampUpRules": []
+        },
+        "autoHealEnabled": false,
+        "cors": {
+          "allowedOrigins": [
+            "https://functions.azure.com",
+            "https://functions-staging.azure.com",
+            "https://functions-next.azure.com"
+          ],
+          "supportCredentials": false
+        },
+        "localMySqlEnabled": false,
+        "managedServiceIdentityId": 7903,
+        "ipSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 1,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ],
+        "scmIpSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 1,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ],
+        "scmIpSecurityRestrictionsUseMain": false,
+        "http20Enabled": false,
+        "minTlsVersion": "1.2",
+        "ftpsState": "AllAllowed",
+        "reservedInstanceCount": 0
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/functions",
+      "apiVersion": "2018-11-01",
+      "name": "[concat(variables('AppFunctionName'), '/', variables('AppFunctionName'))]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('AppFunctionName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/hostNameBindings",
+      "apiVersion": "2018-11-01",
+      "name": "[concat(variables('AppFunctionName'), '/', variables('AppFunctionName'), '.azurewebsites.net')]",
+      "location": "[parameters('AppConfigPrimaryRegion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('AppFunctionName'))]"
+      ],
+      "properties": {
+        "siteName": "[variables('AppFunctionName')]",
+        "hostNameType": "Verified"
+      }
+    },
+    //{
+    //  "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+    //  "apiVersion": "2020-08-01-preview",
+    //  "name": "[concat(variables('StorageName'), '/default/azure-webjobs-hosts')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageName'), 'default')]",
+    //    "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+    //  ],
+    //  "properties": {
+    //    "defaultEncryptionScope": "$account-encryption-key",
+    //    "denyEncryptionScopeOverride": false,
+    //    "publicAccess": "None"
+    //  }
+    //},
+    //{
+    //  "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+    //  "apiVersion": "2020-08-01-preview",
+    //  "name": "[concat(variables('StorageName'), '/default/azure-webjobs-secrets')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageName'), 'default')]",
+    //    "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+    //  ],
+    //  "properties": {
+    //    "defaultEncryptionScope": "$account-encryption-key",
+    //    "denyEncryptionScopeOverride": false,
+    //    "publicAccess": "None"
+    //  }
+    //},
+    //{
+    //  "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+    //  "apiVersion": "2020-08-01-preview",
+    //  "name": "[concat(variables('StorageName'), '/default/scm-releases')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageName'), 'default')]",
+    //    "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+    //  ],
+    //  "properties": {
+    //    "defaultEncryptionScope": "$account-encryption-key",
+    //    "denyEncryptionScopeOverride": false,
+    //    "publicAccess": "None"
+    //  }
+    //},
+    //{
+    //  "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+    //  "apiVersion": "2020-08-01-preview",
+    //  "name": "[concat(variables('StorageName'), '/default/appconfigsyncappbfb9')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('StorageName'), 'default')]",
+    //    "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+    //  ],
+    //  "properties": {
+    //    "accessTier": "TransactionOptimized",
+    //    "shareQuota": 5120,
+    //    "enabledProtocols": "SMB"
+    //  }
+    //},
+    //{
+    //  "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+    //  "apiVersion": "2020-08-01-preview",
+    //  "name": "[concat(variables('StorageName'), '/default/appconfigsyncfunctiona675')]",
+    //  "dependsOn": [
+    //    "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('StorageName'), 'default')]",
+    //    "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+    //  ],
+    //  "properties": {
+    //    "accessTier": "TransactionOptimized",
+    //    "shareQuota": 5120,
+    //    "enabledProtocols": "SMB"
+    //  }
+    //},
+    {
+      "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+      "apiVersion": "2020-08-01-preview",
+      "name": "[concat(variables('StorageName'), '/default/syncqueue')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/queueServices', variables('StorageName'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+      ],
+      "properties": {
+        "metadata": {}
+      }
+    },
+    {
+      "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[concat(variables('PrimaryAppConfigTopic'), '/SyncQueueSubscription')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventGrid/systemTopics', variables('PrimaryAppConfigTopic'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]"
+      ],
+      "properties": {
+        "destination": {
+          "properties": {
+            "resourceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageName'))]",
+            "queueName": "syncqueue"
+          },
+          "endpointType": "StorageQueue"
+        },
+        "filter": {
+          "includedEventTypes": [
+            "Microsoft.AppConfiguration.KeyValueModified",
+            "Microsoft.AppConfiguration.KeyValueDeleted"
+          ]
+        },
+        "labels": [],
+        "eventDeliverySchema": "EventGridSchema",
+        "retryPolicy": {
+          "maxDeliveryAttempts": 30,
+          "eventTimeToLiveInMinutes": 1440
+        }
+      }
+    }
+  ]
+}
