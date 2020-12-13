@@ -20,17 +20,22 @@ namespace AppConfigSyncFunction
     public class AppConfigSync
     {
         private readonly IAppConfigurationSyncService appConfigSyncService;
+        private readonly IQueueService queueService;
         private readonly IConfiguration configuration;
 
         public AppConfigSync(IAppConfigurationSyncService appConfigSyncService,
+            IQueueService queueService,
             IConfiguration configuration)
         {
             if (appConfigSyncService == null)
                 throw new ArgumentNullException(nameof(appConfigSyncService));
+            if (queueService == null)
+                throw new ArgumentNullException(nameof(queueService));
             if (configuration == null)
                 throw new ArgumentNullException(nameof(configuration));
 
             this.appConfigSyncService = appConfigSyncService;
+            this.queueService = queueService;
             this.configuration = configuration;
         }
 
@@ -38,41 +43,38 @@ namespace AppConfigSyncFunction
         public async Task AppConfigSyncFunction([TimerTrigger("%UpdatePollingTime%")] TimerInfo timer,
             ILogger log)
         {
-            string queueConnectionString = configuration.GetValue<string>("SyncQueueConnectionString");
-            var queueClient = new QueueClient(queueConnectionString, "syncqueue");
-            if (queueClient.Exists())
+            await queueService.ConnectAsync();
+            IEnumerable<QueueMessage> messages = null;
+            do
             {
-                Response<QueueMessage[]> response = null;
-                do
+                messages = await queueService.ReceiveMessagesAsync(30);
+                if (messages != null && messages.Any())
                 {
-                    response = await queueClient.ReceiveMessagesAsync(30);
-                    if (response.HasMessages())
+                    appConfigSyncService.Connect();
+                    bool syncResult = true;
+                    foreach (var message in messages)
                     {
-                        appConfigSyncService.Connect();
-                        bool syncResult = true;
-                        foreach (var message in response.Value)
+                        using (var metricLogger = new DurationMetricLogger(MetricNames.EventSynchronizationDuration, log))
                         {
-                            using (var metricLogger = new DurationMetricLogger(MetricNames.EventSynchronizationDuration, log))
+                            var @event = message.CreateEvent();
+
+                            syncResult = true;
+                            if (@event.IsKeyValueModified()) // the setting was added or updated
                             {
-                                var @event = message.CreateEvent();
-
-                                syncResult = true;
-                                if (@event.IsKeyValueModified()) // the setting was added or updated
-                                {
-                                    syncResult = await appConfigSyncService.UpsertToSecondary(@event);
-                                }
-                                else if (@event.IsKeyValueDeleted()) // the setting was deleted
-                                {
-                                    syncResult = await appConfigSyncService.DeleteFromSecondary(@event);
-                                }
+                                syncResult = await appConfigSyncService.UpsertToSecondary(@event);
                             }
-
-                            if (syncResult)
-                                await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+                            else if (@event.IsKeyValueDeleted()) // the setting was deleted
+                            {
+                                syncResult = await appConfigSyncService.DeleteFromSecondary(@event);
+                            }
                         }
+
+                        if (syncResult)
+                            await queueService.DeleteMessageAsync(message.MessageId, message.PopReceipt);
                     }
-                } while (response.HasMessages());
-            }
+                }
+            } while (messages != null && messages.Any());
+
         }
     }
 }

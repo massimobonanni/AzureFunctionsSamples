@@ -6,7 +6,7 @@ namespace AppConfigSyncFunction.Interfaces
 {
     public interface IAppConfigurationSyncService
     {
-        void Connect(string primaryConnectionString = "AppConfigPrimaryConnectionString", string secondaryConnectionString = "AppConfigSecondaryConnectionString");
+        void Connect(string primaryConnectionString = null, string secondaryConnectionString = null);
         Task<bool> DeleteFromSecondary(Event @event, CancellationToken cancellationToken = default);
         Task<bool> UpsertToSecondary(Event @event, CancellationToken cancellationToken = default);
     }

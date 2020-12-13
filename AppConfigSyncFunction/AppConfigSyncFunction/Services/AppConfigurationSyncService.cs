@@ -31,20 +31,22 @@ namespace AppConfigSyncFunction.Services
             this.configuration = configuration;
         }
 
-        public void Connect(string primaryConnectionString = DefaultPrimaryConnectionStringKey,
-            string secondaryConnectionString = DefaultSecondaryConnectionStringKey)
+        public void Connect(string primaryConnectionStringKey = null,
+            string secondaryConnectionStringKey = null)
         {
             logger.LogTrace($"Starting creation App Configuration clients");
+            primaryConnectionStringKey ??= DefaultPrimaryConnectionStringKey;
 
-            string appConfigPrimaryConnectionString = configuration.GetValue<string>(primaryConnectionString);
+            string appConfigPrimaryConnectionString = configuration.GetValue<string>(primaryConnectionStringKey);
             if (string.IsNullOrWhiteSpace(appConfigPrimaryConnectionString))
             {
-                var message = $"The connection string '{primaryConnectionString}' is not valid";
+                var message = $"The connection string '{primaryConnectionStringKey}' is not valid";
                 logger.LogError(message);
                 throw new Exception(message);
             }
 
-            string appConfigSecondaryConnectionString = configuration.GetValue<string>(secondaryConnectionString);
+            secondaryConnectionStringKey ??= DefaultSecondaryConnectionStringKey;
+            string appConfigSecondaryConnectionString = configuration.GetValue<string>(secondaryConnectionStringKey);
             if (string.IsNullOrWhiteSpace(appConfigSecondaryConnectionString))
             {
                 var message = $"The connection string '{appConfigSecondaryConnectionString}' is not valid";

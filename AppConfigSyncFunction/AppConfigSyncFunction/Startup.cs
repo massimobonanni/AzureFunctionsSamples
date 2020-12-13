@@ -15,6 +15,7 @@ namespace AppConfigSyncFunction
         public override void Configure(IFunctionsHostBuilder builder)
         {
             builder.Services.AddTransient<IAppConfigurationSyncService, AppConfigurationSyncService>();
+            builder.Services.AddTransient<IQueueService, StorageQueueService>();
         }
     }
 
