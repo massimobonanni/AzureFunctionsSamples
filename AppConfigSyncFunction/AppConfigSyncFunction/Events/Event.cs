@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace AppConfigSyncFunction
+namespace AppConfigSyncFunction.Events
 {
     public class Event
     {
@@ -21,12 +19,12 @@ namespace AppConfigSyncFunction
 
         public bool IsKeyValueModified()
         {
-            return this.EventType == KeyValueModified;
+            return EventType == KeyValueModified;
         }
 
         public bool IsKeyValueDeleted()
         {
-            return this.EventType == KeyValueDeleted;
+            return EventType == KeyValueDeleted;
         }
 
         public override string ToString()

@@ -1,4 +1,5 @@
-﻿using Azure;
+﻿using AppConfigSyncFunction.Events;
+using Azure;
 using Azure.Storage.Queues.Models;
 using Newtonsoft.Json;
 using System;
@@ -20,7 +21,7 @@ namespace AppConfigSyncFunction
             return JsonConvert.DeserializeObject<Event>(Encoding.UTF8.GetString(base64EncodedBytes));
         }
 
-        public static bool IsValid(this Response<QueueMessage[]> response)
+        public static bool HasMessages(this Response<QueueMessage[]> response)
         {
             return response != null && response.Value != null && response.Value.Any();
         }

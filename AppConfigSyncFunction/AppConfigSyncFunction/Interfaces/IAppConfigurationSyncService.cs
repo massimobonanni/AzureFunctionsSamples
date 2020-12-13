@@ -1,7 +1,8 @@
-﻿using System.Threading;
+﻿using AppConfigSyncFunction.Events;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace AppConfigSyncFunction
+namespace AppConfigSyncFunction.Interfaces
 {
     public interface IAppConfigurationSyncService
     {

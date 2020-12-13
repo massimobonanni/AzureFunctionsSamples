@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Text;
 using AppConfigSyncFunction;
 using Microsoft.Extensions.DependencyInjection;
+using AppConfigSyncFunction.Interfaces;
+using AppConfigSyncFunction.Services;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace AppConfigSyncFunction

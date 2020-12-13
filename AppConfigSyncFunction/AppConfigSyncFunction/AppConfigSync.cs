@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppConfigSyncFunction.Interfaces;
+using AppConfigSyncFunction.Logging;
 using Azure;
 using Azure.Data.AppConfiguration;
 using Azure.Storage.Queues;
@@ -40,14 +42,13 @@ namespace AppConfigSyncFunction
             var queueClient = new QueueClient(queueConnectionString, "syncqueue");
             if (queueClient.Exists())
             {
-                appConfigSyncService.Connect();
-
                 Response<QueueMessage[]> response = null;
                 do
                 {
                     response = await queueClient.ReceiveMessagesAsync(30);
-                    if (response.IsValid())
+                    if (response.HasMessages())
                     {
+                        appConfigSyncService.Connect();
                         bool syncResult = true;
                         foreach (var message in response.Value)
                         {
@@ -70,7 +71,7 @@ namespace AppConfigSyncFunction
                                 await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
                         }
                     }
-                } while (response.IsValid());
+                } while (response.HasMessages());
             }
         }
     }

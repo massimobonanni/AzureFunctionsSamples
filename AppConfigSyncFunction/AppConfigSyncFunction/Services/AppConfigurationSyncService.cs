@@ -1,14 +1,14 @@
-﻿using Azure.Data.AppConfiguration;
+﻿using AppConfigSyncFunction.Events;
+using AppConfigSyncFunction.Interfaces;
+using AppConfigSyncFunction.Logging;
+using Azure.Data.AppConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AppConfigSyncFunction
+namespace AppConfigSyncFunction.Services
 {
     public class AppConfigurationSyncService : IAppConfigurationSyncService
     {
@@ -35,7 +35,7 @@ namespace AppConfigSyncFunction
             string secondaryConnectionString = DefaultSecondaryConnectionStringKey)
         {
             logger.LogTrace($"Starting creation App Configuration clients");
-            
+
             string appConfigPrimaryConnectionString = configuration.GetValue<string>(primaryConnectionString);
             if (string.IsNullOrWhiteSpace(appConfigPrimaryConnectionString))
             {
@@ -62,13 +62,13 @@ namespace AppConfigSyncFunction
         {
             if (@event == null)
                 throw new ArgumentNullException(nameof(@event));
-            
+
             logger.LogTrace($"Starting {nameof(UpsertToSecondary)}");
-            
+
             var result = true;
             try
             {
-                using (var metricLogger = new DurationMetricLogger(MetricNames.UpsertToSecondaryDuration, this.logger))
+                using (var metricLogger = new DurationMetricLogger(MetricNames.UpsertToSecondaryDuration, logger))
                 {
                     var primarySetting = await primaryClient.GetConfigurationSettingAsync(@event.Data.key, @event.Data.label, cancellationToken);
                     await secondaryClient.SetConfigurationSettingAsync(primarySetting, false, cancellationToken);
@@ -79,7 +79,7 @@ namespace AppConfigSyncFunction
                 logger.LogError(ex, $"Error during upsert settings from primary to secondary -> [{@event.Data.key},{@event.Data.label}]");
                 result = false;
             }
-            
+
             logger.LogTrace($"Finish {nameof(UpsertToSecondary)}");
 
             return result;
@@ -95,7 +95,7 @@ namespace AppConfigSyncFunction
             var result = true;
             try
             {
-                using (var metricLogger = new DurationMetricLogger(MetricNames.DeleteFromSecondaryDuration, this.logger))
+                using (var metricLogger = new DurationMetricLogger(MetricNames.DeleteFromSecondaryDuration, logger))
                 {
                     await secondaryClient.DeleteConfigurationSettingAsync(@event.Data.key, @event.Data.label, cancellationToken);
                 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace AppConfigSyncFunction
+namespace AppConfigSyncFunction.Logging
 {
     public abstract class MetricLoggerBase : IDisposable
     {
@@ -27,7 +27,7 @@ namespace AppConfigSyncFunction
     {
         private Stopwatch stopwatch;
         private string metricName;
-        private IDictionary<string, object> properties=new Dictionary<string, object>();
+        private IDictionary<string, object> properties = new Dictionary<string, object>();
 
         public DurationMetricLogger(string metricName, ILogger logger,
             IDictionary<string, object> properties = null) : base(logger)
@@ -50,9 +50,9 @@ namespace AppConfigSyncFunction
         {
             stopwatch.Stop();
 
-            this.properties.Add(nameof(stopwatch.Elapsed), stopwatch.Elapsed);
-            logger.LogMetric(metricName, stopwatch.ElapsedMilliseconds, this.properties);
-            
+            properties.Add(nameof(stopwatch.Elapsed), stopwatch.Elapsed);
+            logger.LogMetric(metricName, stopwatch.ElapsedMilliseconds, properties);
+
             base.Dispose();
         }
     }
