@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppConfigSyncFunction", "Ap
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "AppConfigSyncFunction.ARM", "AppConfigSyncFunction.ARM\AppConfigSyncFunction.ARM.deployproj", "{066CD6E6-2BD8-4179-BBF8-17F14E8C974E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppConfigSyncFunction.Tests", "AppConfigSyncFunction.Tests\AppConfigSyncFunction.Tests.csproj", "{513B01BD-A55B-4470-9633-48385B04C3D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{066CD6E6-2BD8-4179-BBF8-17F14E8C974E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{066CD6E6-2BD8-4179-BBF8-17F14E8C974E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{066CD6E6-2BD8-4179-BBF8-17F14E8C974E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{513B01BD-A55B-4470-9633-48385B04C3D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{513B01BD-A55B-4470-9633-48385B04C3D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{513B01BD-A55B-4470-9633-48385B04C3D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{513B01BD-A55B-4470-9633-48385B04C3D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

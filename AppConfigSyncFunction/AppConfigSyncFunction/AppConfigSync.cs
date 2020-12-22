@@ -44,7 +44,7 @@ namespace AppConfigSyncFunction
             ILogger log)
         {
             await queueService.ConnectAsync();
-            IEnumerable<QueueMessage> messages = null;
+            IEnumerable<QueueMessage> messages;
             do
             {
                 messages = await queueService.ReceiveMessagesAsync(30);
