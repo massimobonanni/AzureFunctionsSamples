@@ -8,6 +8,8 @@ namespace AppConfigSyncFunction.Events
         public const string KeyValueDeleted = "Microsoft.AppConfiguration.KeyValueDeleted";
         public const string KeyValueModified = "Microsoft.AppConfiguration.KeyValueModified";
 
+        public object PersistenceId { get; set; }
+
         public string Id { get; set; }
         public string Topic { get; set; }
         public string Subject { get; set; }

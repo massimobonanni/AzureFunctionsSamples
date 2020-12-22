@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppConfigSyncFunction.Events;
 using AppConfigSyncFunction.Interfaces;
 using AppConfigSyncFunction.Logging;
 using Azure;
@@ -20,11 +21,11 @@ namespace AppConfigSyncFunction
     public class AppConfigSync
     {
         private readonly IAppConfigurationSyncService appConfigSyncService;
-        private readonly IQueueService queueService;
+        private readonly IEventsService queueService;
         private readonly IConfiguration configuration;
 
         public AppConfigSync(IAppConfigurationSyncService appConfigSyncService,
-            IQueueService queueService,
+            IEventsService queueService,
             IConfiguration configuration)
         {
             if (appConfigSyncService == null)
@@ -44,20 +45,18 @@ namespace AppConfigSyncFunction
             ILogger log)
         {
             await queueService.ConnectAsync();
-            IEnumerable<QueueMessage> messages;
+            IEnumerable<Event> events;
             do
             {
-                messages = await queueService.ReceiveMessagesAsync(30);
-                if (messages != null && messages.Any())
+                events = await queueService.ReceiveEventsAsync(30);
+                if (events != null && events.Any())
                 {
                     appConfigSyncService.Connect();
                     bool syncResult = true;
-                    foreach (var message in messages)
+                    foreach (var @event in events)
                     {
                         using (var metricLogger = new DurationMetricLogger(MetricNames.EventSynchronizationDuration, log))
                         {
-                            var @event = message.CreateEvent();
-
                             syncResult = true;
                             if (@event.IsKeyValueModified()) // the setting was added or updated
                             {
@@ -70,10 +69,10 @@ namespace AppConfigSyncFunction
                         }
 
                         if (syncResult)
-                            await queueService.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+                            await queueService.DeleteEventAsync(@event);
                     }
                 }
-            } while (messages != null && messages.Any());
+            } while (events != null && events.Any());
 
         }
     }
