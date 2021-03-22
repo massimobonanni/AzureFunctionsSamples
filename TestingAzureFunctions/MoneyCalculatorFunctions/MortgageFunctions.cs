@@ -108,7 +108,7 @@ namespace MoneyCalculatorFunctions
         private bool GetNumberOfPaymentsFromQueryString(HttpRequest req, out uint nPayments)
         {
             nPayments = 0;
-            string queryInterest = req.Query[InterestQueryKey]; string querynPayments = req.Query[NumberOfPaymentsQueryKey];
+            string querynPayments = req.Query[NumberOfPaymentsQueryKey];
             if (querynPayments == null || !uint.TryParse(querynPayments, out nPayments))
                 return false;
             return true;

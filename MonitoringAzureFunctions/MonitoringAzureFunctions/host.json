@@ -5,7 +5,7 @@
     "logLevel": {
       "default": "Trace",
       "Function": "Trace",
-      "Function.TimerTriggerFunction": "Information",
+      "Function.TimerTriggerFunction": "Trace",
       "Microsoft" : "Information",
       "Host.Results": "Information",
       "Host.Aggregator": "Error"

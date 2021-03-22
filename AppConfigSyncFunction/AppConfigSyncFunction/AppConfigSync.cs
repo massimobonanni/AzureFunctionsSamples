@@ -41,7 +41,8 @@ namespace AppConfigSyncFunction
         }
 
         [FunctionName(nameof(AppConfigSyncFunction))]
-        public async Task AppConfigSyncFunction([TimerTrigger("%UpdatePollingTime%")] TimerInfo timer,
+        public async Task AppConfigSyncFunction(
+            [TimerTrigger("%UpdatePollingTime%")] TimerInfo timer,
             ILogger log)
         {
             await queueService.ConnectAsync();

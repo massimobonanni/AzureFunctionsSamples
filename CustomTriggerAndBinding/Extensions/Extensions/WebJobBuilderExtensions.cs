@@ -20,8 +20,6 @@ namespace Microsoft.Azure.WebJobs
 
             builder.AddExtension<WeatherTriggerConfigProvider>();
 
-            // Add here all the configuration code for the extension
-
             return builder;
         }
 

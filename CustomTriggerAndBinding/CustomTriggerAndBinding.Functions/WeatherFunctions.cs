@@ -17,7 +17,7 @@ namespace Functions
         #region [ Custom Trigger ]
         [FunctionName(nameof(MilanWeatherCheck))]
         public static void MilanWeatherCheck(
-           [WeatherTrigger("Milan,IT", 0.05, SecondsBetweenCheck = 10)] WeatherPayload req,
+           [WeatherTrigger("Milan,IT", 0.01, SecondsBetweenCheck = 10)] WeatherPayload req,
            ILogger log)
         {
             var message = $"{req.CityName} [{req.CurrentTemperature}] at {req.Timestamp}";
@@ -28,7 +28,7 @@ namespace Functions
         #region [ Custom Trigger and Binding ]
         [FunctionName(nameof(RomeWeatherCheck))]
         public static async Task RomeWeatherCheck(
-            [WeatherTrigger("Rome,IT", 0.05, SecondsBetweenCheck = 10)] WeatherPayload req,
+            [WeatherTrigger("Rome,IT", 0.01, SecondsBetweenCheck = 20)] WeatherPayload req,
             [TwitterBinding] IAsyncCollector<string> tweetMessages,
             ILogger log)
         {
