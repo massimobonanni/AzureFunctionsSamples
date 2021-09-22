@@ -11,12 +11,7 @@ namespace ServerlessKeyRotation.Functions
 {
     public  class KeyRotationFunctions
     {
-        private string clientId = "7f56541e-5dac-4c8e-b44a-13e597fbd255";
-        private string clientSecret = "bcd5LBiom6.wriJ84Tc9Sb5~18LSu.8RI4";
-        private string tenantId = "5afdc82f-48ec-47e7-aeca-f21caa1537e1";
-        private string subscriptionId = "60504780-44c1-4d01-b84f-baca1d9239ed";
-        private string connectionStringName = "StorageAccountConnectionString";
-        private string storageName = "frontendstore";
+        
 
         [FunctionName("StorageKeyRotation")]
         public async Task Run([TimerTrigger("0 */2 * * * *")]TimerInfo myTimer, ILogger log)
