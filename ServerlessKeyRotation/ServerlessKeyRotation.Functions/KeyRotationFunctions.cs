@@ -24,7 +24,7 @@ namespace ServerlessKeyRotation.Functions
         }
 
         [FunctionName("StorageKeyRotation")]
-        public async Task Run([TimerTrigger("0 */2 * * * *")] TimerInfo myTimer, ILogger log)
+        public async Task Run([TimerTrigger("%rotationTimer%")] TimerInfo myTimer, ILogger log)
         {
             log.LogInformation($"Rotation key function: start at {DateTime.Now}");
 
