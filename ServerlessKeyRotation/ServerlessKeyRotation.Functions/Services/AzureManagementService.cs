@@ -49,39 +49,34 @@ namespace ServerlessKeyRotation.Functions.Services
                 var currentSetting = currentSettings[rotationConfig.ResourceConfiguration.ConnectionStringName].Value;
 
                 if (currentSetting == GenerateConnectionStringForStorage(rotationConfig.ResourceConfiguration.StorageName, keys[0].Value))
-                {
                     currentKeyIndex = 0;
-                }
                 else if (currentSetting == GenerateConnectionStringForStorage(rotationConfig.ResourceConfiguration.StorageName, keys[1].Value))
-                {
                     currentKeyIndex = 1;
-                }
 
                 logger.LogInformation($"Current Key Index {currentKeyIndex}");
 
                 if (currentKeyIndex.HasValue)
                 {
-                    string newKey = null;
+                    string newKey;
                     if (currentKeyIndex == 0)
-                    {
                         newKey = keys[1].Value;
-                    }
                     else
-                    {
                         newKey = keys[0].Value;
-                    }
 
                     var newConnectionString = GenerateConnectionStringForStorage(rotationConfig.ResourceConfiguration.StorageName, newKey);
                     logger.LogInformation($"New connection String {newConnectionString}");
 
                     logger.LogInformation($"Update settings for appservice {rotationConfig.ResourceConfiguration.AppServiceName}");
-                    var result = await webApp.Update().WithAppSetting(rotationConfig.ResourceConfiguration.ConnectionStringName, newConnectionString).ApplyAsync();
+                    await webApp.Update().WithAppSetting(rotationConfig.ResourceConfiguration.ConnectionStringName, newConnectionString).ApplyAsync();
 
-                    logger.LogInformation($"Restart appservice { rotationConfig.ResourceConfiguration.AppServiceName}");
-                    await webApp.RestartAsync();
+                    if (rotationConfig.RestartWebApp)
+                    {
+                        logger.LogInformation($"Restart appservice { rotationConfig.ResourceConfiguration.AppServiceName}");
+                        await webApp.RestartAsync();
+                    }
 
                     logger.LogInformation($"Regenerate key 'key{currentKeyIndex + 1}' in storage {rotationConfig.ResourceConfiguration.StorageName}");
-                    var a = await storage.RegenerateKeyAsync($"key{currentKeyIndex + 1}");
+                    await storage.RegenerateKeyAsync($"key{currentKeyIndex + 1}");
 
                     retval = true;
                 }

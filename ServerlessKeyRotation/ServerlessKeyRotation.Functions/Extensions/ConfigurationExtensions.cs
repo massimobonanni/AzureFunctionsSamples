@@ -15,6 +15,8 @@ namespace Microsoft.Extensions.Configuration
                 ResourceConfiguration = new ResourceConfiguration()
             };
 
+            result.RestartWebApp= config.GetValue<bool>($"{settingName}:restartWebApp");
+
             result.AuthConfiguration.ClientId=config.GetValue<string>($"{settingName}:authConfiguration:clientId");
             result.AuthConfiguration.ClientSecret = config.GetValue<string>($"{settingName}:authConfiguration:clientSecret");
             result.AuthConfiguration.SubscriptionId = config.GetValue<string>($"{settingName}:authConfiguration:subscriptionId");

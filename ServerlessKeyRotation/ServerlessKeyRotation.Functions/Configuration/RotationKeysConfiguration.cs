@@ -6,6 +6,8 @@ namespace ServerlessKeyRotation.Functions.Configuration
 {
     public class RotationKeysConfiguration
     {
+        public bool RestartWebApp { get; set; } = true;
+
         public AuthConfiguration AuthConfiguration { get; set; }
 
         public ResourceConfiguration ResourceConfiguration { get; set; }
