@@ -1,0 +1,21 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      }
+    }
+  },
+  "extensions": {
+    "durableTask": {
+      "storageProvider": {
+        "type": "mssql",
+        "connectionStringName": "SQLDB_Connection",
+        "taskEventLockTimeout": "00:02:00",
+        "createDatabaseIfNotExists": true
+      }
+    }
+  }
+}
