@@ -32,7 +32,6 @@ namespace Extensions.Triggers
             var triggerAttributeBindingRule = context.AddBindingRule<WeatherTriggerAttribute>();
             triggerAttributeBindingRule.BindToTrigger<WeatherPayload>(
                 new WeatherTriggerBindingProvider(this._nameResolver, this._loggerFactory, this._weatherService));
-
         }
     }
 }

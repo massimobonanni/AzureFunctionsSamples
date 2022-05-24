@@ -42,6 +42,7 @@ namespace Extensions.Triggers
 
             this._logger = this._loggerFactory.CreateLogger<WeatherTriggerBinding>();
         }
+
         public Task<ITriggerData> BindAsync(object value, ValueBindingContext context)
         {
             return _emptyBindingDataTask;
