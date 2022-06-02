@@ -10,11 +10,12 @@
   },
   "extensions": {
     "durableTask": {
+      "hubName": "StorageProviderHub",
       "storageProvider": {
-        "type": "mssql",
-        "connectionStringName": "SQLDB_Connection",
-        "taskEventLockTimeout": "00:02:00",
-        "createDatabaseIfNotExists": true
+        //"type": "mssql",
+        //"connectionStringName": "SQLDB_Connection",
+        //"taskEventLockTimeout": "00:02:00",
+        //"createDatabaseIfNotExists": true
       }
     }
   }
