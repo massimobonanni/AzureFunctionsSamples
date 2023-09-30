@@ -10,15 +10,18 @@ using Microsoft.Extensions.Logging;
 using MoneyCalculatorFunctions.Entities;
 using MoneyCalculatorFunctions.Services;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace MoneyCalculatorFunctions
 {
     public class MortgageFunctions
     {
+        private static CultureInfo cultureProvider = CultureInfo.InvariantCulture;
+
         internal const string LoanQueryKey = "loan";
         internal const string InterestQueryKey = "interest";
         internal const string NumberOfPaymentsQueryKey = "nPayments";
-        
+
         private readonly IMortgageCalculator mortgageCalculator;
 
         public MortgageFunctions(IMortgageCalculator mortgageCalculator)
@@ -86,12 +89,15 @@ namespace MoneyCalculatorFunctions
             return new BadRequestObjectResult(calculatorResult.Error.Message);
         }
 
+
+
         #region [ Private Methods ]
         private bool GetLoanFromQueryString(HttpRequest req, out decimal loan)
         {
             loan = 0;
             string queryLoan = req.Query[LoanQueryKey];
-            if (queryLoan == null || !decimal.TryParse(queryLoan, out loan))
+            if (queryLoan == null ||
+                !decimal.TryParse(queryLoan, NumberStyles.Number, cultureProvider, out loan))
                 return false;
             return true;
         }
@@ -100,7 +106,8 @@ namespace MoneyCalculatorFunctions
         {
             interest = 0;
             string queryInterest = req.Query[InterestQueryKey];
-            if (queryInterest == null || !double.TryParse(queryInterest, out interest))
+            if (queryInterest == null ||
+                !double.TryParse(queryInterest, NumberStyles.Number, cultureProvider, out interest))
                 return false;
             return true;
         }
@@ -109,7 +116,8 @@ namespace MoneyCalculatorFunctions
         {
             nPayments = 0;
             string querynPayments = req.Query[NumberOfPaymentsQueryKey];
-            if (querynPayments == null || !uint.TryParse(querynPayments, out nPayments))
+            if (querynPayments == null ||
+                !uint.TryParse(querynPayments, NumberStyles.Number, cultureProvider, out nPayments))
                 return false;
             return true;
         }
