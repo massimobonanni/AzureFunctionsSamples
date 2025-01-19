@@ -33,6 +33,5 @@ namespace ServerlessKeyRotation.Functions
             await this.managementService.RotateStorageKeyForAppServiceAsync(rotationConfig);
         }
 
-
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
+using Microsoft.Azure.Management.Storage.Fluent.Models;
 using Microsoft.Extensions.Logging;
 using ServerlessKeyRotation.Functions.Configuration;
 using ServerlessKeyRotation.Functions.Interfaces;
@@ -45,41 +46,34 @@ namespace ServerlessKeyRotation.Functions.Services
             if (currentSettings.ContainsKey(rotationConfig.ResourceConfiguration.ConnectionStringName))
             {
                 logger.LogInformation("App Setting found");
-                int? currentKeyIndex = null;
-                var currentSetting = currentSettings[rotationConfig.ResourceConfiguration.ConnectionStringName].Value;
+                var currentKeyValue = rotationConfig.ExtractKeyFromConnectionString(currentSettings[rotationConfig.ResourceConfiguration.ConnectionStringName].Value);
+                int currentKeyIndex;
+                StorageAccountKey newKey = null;
 
-                if (currentSetting == GenerateConnectionStringForStorage(rotationConfig.ResourceConfiguration.StorageName, keys[0].Value))
-                    currentKeyIndex = 0;
-                else if (currentSetting == GenerateConnectionStringForStorage(rotationConfig.ResourceConfiguration.StorageName, keys[1].Value))
-                    currentKeyIndex = 1;
-
-                logger.LogInformation($"Current Key Index {currentKeyIndex}");
-
-                if (currentKeyIndex.HasValue)
+                if (currentKeyValue == keys[0].Value)
                 {
-                    string newKey;
-                    if (currentKeyIndex == 0)
-                        newKey = keys[1].Value;
-                    else
-                        newKey = keys[0].Value;
-
-                    var newConnectionString = GenerateConnectionStringForStorage(rotationConfig.ResourceConfiguration.StorageName, newKey);
-                    logger.LogInformation($"New connection String {newConnectionString}");
-
-                    logger.LogInformation($"Update settings for appservice {rotationConfig.ResourceConfiguration.AppServiceName}");
-                    await webApp.Update().WithAppSetting(rotationConfig.ResourceConfiguration.ConnectionStringName, newConnectionString).ApplyAsync();
-
-                    if (rotationConfig.RestartWebApp)
-                    {
-                        logger.LogInformation($"Restart appservice { rotationConfig.ResourceConfiguration.AppServiceName}");
-                        await webApp.RestartAsync();
-                    }
-
-                    logger.LogInformation($"Regenerate key 'key{currentKeyIndex + 1}' in storage {rotationConfig.ResourceConfiguration.StorageName}");
-                    await storage.RegenerateKeyAsync($"key{currentKeyIndex + 1}");
-
-                    retval = true;
+                    currentKeyIndex = 0;
+                    newKey = keys[1];
                 }
+                else
+                {
+                    currentKeyIndex = 1;
+                    newKey = keys[0];
+                }
+
+                var newConnectionString = GenerateConnectionStringForStorage(rotationConfig.ResourceConfiguration.StorageName,
+                    newKey.Value);
+
+                // Update the App Service with the new connection string
+                await webApp
+                    .Update()
+                    .WithAppSetting(rotationConfig.ResourceConfiguration.ConnectionStringName, newConnectionString)
+                    .ApplyAsync();
+
+                // Regenerate the key in the storage
+                await storage.RegenerateKeyAsync(keys[currentKeyIndex].KeyName);
+                retval = true;
+
             }
             return retval;
         }

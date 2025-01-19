@@ -11,6 +11,7 @@ using MoneyCalculatorFunctions.Entities;
 using MoneyCalculatorFunctions.Services;
 using Newtonsoft.Json;
 using System.Globalization;
+using Microsoft.Extensions.Configuration;
 
 namespace MoneyCalculatorFunctions
 {
@@ -30,6 +31,7 @@ namespace MoneyCalculatorFunctions
                 throw new ArgumentNullException(nameof(mortgageCalculator));
 
             this.mortgageCalculator = mortgageCalculator;
+
         }
 
         [FunctionName(FunctionNames.MortgageCalculatorFunction)]
